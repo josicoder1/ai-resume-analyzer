@@ -8,18 +8,22 @@ export const meta = () => [
 ];
 
 const Auth: React.FC = () => {
-    const { isLoading, auth } = usePuterStore(); // Added auth destructuring
+    const { isLoading, auth } = usePuterStore();
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Extract "next" parameter safely
     const next = new URLSearchParams(location.search).get("next") || "/";
 
     useEffect(() => {
-        if (auth?.isAuthenticated) {
+        if (auth?.isAuthenticated && location.pathname !== next) {
             navigate(next);
         }
-    }, [auth?.isAuthenticated, navigate, next]);
+    }, [auth?.isAuthenticated, navigate, next, location.pathname]);
+
+    const handleSignOut = async () => {
+        await auth.signOut();
+        navigate("/auth");
+    };
 
     return (
         <main className="bg-[url('/images/bg-auth.svg')] bg-cover min-h-screen flex items-center justify-center">
@@ -36,7 +40,7 @@ const Auth: React.FC = () => {
                                 <p>Signing you in...</p>
                             </button>
                         ) : auth?.isAuthenticated ? (
-                            <button className="auth-button" onClick={auth.signOut}>
+                            <button className="auth-button" onClick={handleSignOut}>
                                 <p>Log Out</p>
                             </button>
                         ) : (
